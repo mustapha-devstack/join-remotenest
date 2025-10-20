@@ -4,16 +4,16 @@ import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 
 export const metadata: Metadata = {
-  title: "Remotenest — Premium Landing",
+  title: "Remotenest – AI-Powered Job Matching",
   description:
     "Remotenest is a modern AI-powered platform connecting students and employers. Built with Next.js, Tailwind CSS, and shadcn/ui.",
   icons: {
     icon: "/images/logo.png", // Favicon or site icon
   },
   openGraph: {
-    title: "Remotenest — Premium Landing",
+    title: "Remotenest – AI-Powered Job Matching",
     description:
-      "Join Remotenest and connect with top talents and organizations worldwide.",
+      "Discover your ideal remote job with Remotenest. Our AI-driven platform matches students and professionals to opportunities tailored to your skills, interests, and career goals. Start building your future today!",
     url: "https://join-remotenest.vercel.app/", // change when deployed
     siteName: "Remotenest",
     images: [
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Remotenest — Premium Landing",
+    title: "Remotenest – AI-Powered Job Matching",
     description:
-      "An AI-powered remote job platform designed for students and teams.",
+      "Discover your ideal remote job with Remotenest. Our AI-driven platform matches students and professionals to opportunities tailored to your skills, interests, and career goals. Start building your future today!",
     images: ["/images/logo.png"],
   },
 };
