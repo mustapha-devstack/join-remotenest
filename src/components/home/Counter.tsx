@@ -5,12 +5,16 @@ import { motion } from "framer-motion";
 import { Timer } from "lucide-react";
 
 export default function CountdownSection() {
-  const targetDate = new Date("2026-01-01T00:00:00").getTime();
   const [timeLeft, setTimeLeft] = useState({
-    days: 0, hours: 0, minutes: 0, seconds: 0,
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
   });
 
   useEffect(() => {
+    const targetDate = new Date("2026-01-01T00:00:00").getTime();
+
     const timer = setInterval(() => {
       const now = new Date().getTime();
       const distance = targetDate - now;
@@ -24,8 +28,9 @@ export default function CountdownSection() {
 
       if (distance < 0) clearInterval(timer);
     }, 1000);
+
     return () => clearInterval(timer);
-  }, []);
+  }, []); // ✅ no warning anymore
 
   const { days, hours, minutes, seconds } = timeLeft;
 
@@ -52,7 +57,6 @@ export default function CountdownSection() {
             Launching Soon 🚀
           </h2>
         </div>
-
         <p className="text-gray-600 mb-10">
           Be among the first to experience the future of remote work.
         </p>

@@ -1,27 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, User, Briefcase, Send, ArrowLeft, ArrowRight } from "lucide-react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 
+interface FormData {
+  fullName: string;
+  email: string;
+  phone: string;
+  jobTitle: string;
+  bio: string;
+}
+
 export default function TalentSignupPage() {
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
+  const [step, setStep] = useState<number>(1);
+  const [formData, setFormData] = useState<FormData>({
     fullName: "",
     email: "",
     phone: "",
     jobTitle: "",
     bio: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
   const router = useRouter();
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -37,14 +45,16 @@ export default function TalentSignupPage() {
     try {
       const res = await axios.post("/api/signup/talent", formData);
       if (res.status === 201) {
-        // ✅ Mark user as just signed up
         sessionStorage.setItem("justSignedUp", "true");
-
         setSuccess("Signup successful! Redirecting...");
         setTimeout(() => router.push("/thank-you"), 1500);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Something went wrong.");
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        setError(err.response?.data?.error || "Something went wrong.");
+      } else {
+        setError("Unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }
@@ -71,23 +81,19 @@ export default function TalentSignupPage() {
         transition={{ duration: 0.8 }}
         className="relative z-10 w-full max-w-2xl bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl p-10 border border-[#9EF0D0]/40"
       >
-        <h1 className="text-3xl font-bold text-center mb-6 text-[#00C896]">
-          Talent Signup
-        </h1>
+        <h1 className="text-3xl font-bold text-center mb-6 text-[#00C896]">Talent Signup</h1>
 
         {/* Step Indicators */}
         <div className="flex justify-center mb-8 space-x-3">
           {[1, 2, 3].map((num) => (
             <div
               key={num}
-              className={`w-3 h-3 rounded-full ${
-                num === step ? "bg-[#00C896]" : "bg-gray-300"
-              }`}
+              className={`w-3 h-3 rounded-full ${num === step ? "bg-[#00C896]" : "bg-gray-300"}`}
             />
           ))}
         </div>
 
-        {/* STEP 1 - Personal Info */}
+        {/* STEP 1 */}
         {step === 1 && (
           <motion.div
             key="step1"
@@ -123,7 +129,7 @@ export default function TalentSignupPage() {
           </motion.div>
         )}
 
-        {/* STEP 2 - Job Info */}
+        {/* STEP 2 */}
         {step === 2 && (
           <motion.div
             key="step2"
@@ -145,10 +151,7 @@ export default function TalentSignupPage() {
               />
             </div>
             <div className="relative">
-              <Briefcase
-                className="absolute left-3 top-3.5 text-[#00C896]"
-                size={20}
-              />
+              <Briefcase className="absolute left-3 top-3.5 text-[#00C896]" size={20} />
               <input
                 type="text"
                 name="jobTitle"
@@ -162,7 +165,7 @@ export default function TalentSignupPage() {
           </motion.div>
         )}
 
-        {/* STEP 3 - Bio */}
+        {/* STEP 3 */}
         {step === 3 && (
           <motion.div
             key="step3"

@@ -32,11 +32,15 @@ export default function TeamSignupPage() {
     message: "",
   });
 
-  const handleChange = (e: any) => {
+  // ✅ Proper typing for input, textarea, and select change events
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ✅ File input event typing
   const handleCvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setCv(e.target.files[0]);
@@ -68,6 +72,7 @@ export default function TeamSignupPage() {
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
+  // ✅ Typed error handling without `any`
   const handleSubmit = async () => {
     const err = validateStep();
     if (err) return setError(err);
@@ -94,9 +99,14 @@ export default function TeamSignupPage() {
         setSuccess("Signup successful! Redirecting...");
         setTimeout(() => router.push("/thank-you"), 1500);
       }
-    } catch (err: any) {
-      console.error(err);
-      setError(err.response?.data?.error || "Something went wrong!");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error(error);
+        setError(error.response?.data?.error || "Something went wrong!");
+      } else {
+        console.error(error);
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }

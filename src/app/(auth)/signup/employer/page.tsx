@@ -15,14 +15,24 @@ import {
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
+interface EmployerFormData {
+  companyName: string;
+  email: string;
+  phone: string;
+  companySize: string;
+  website: string;
+  password: string;
+  message: string;
+}
+
 export default function EmployerSignupPage() {
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [step, setStep] = useState<number>(1);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EmployerFormData>({
     companyName: "",
     email: "",
     phone: "",
@@ -32,17 +42,20 @@ export default function EmployerSignupPage() {
     message: "",
   });
 
-  const handleChange = (e: any) => {
+  // ✅ Type-safe onChange handler
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const validateStep = () => {
+  const validateStep = (): string => {
     if (step === 2) {
-      if (!formData.companyName.trim())
-        return "Company name is required.";
-      if (!formData.email.trim())
-        return "Email address is required.";
+      if (!formData.companyName.trim()) return "Company name is required.";
+      if (!formData.email.trim()) return "Email address is required.";
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email))
         return "Please enter a valid email address.";
@@ -81,18 +94,19 @@ export default function EmployerSignupPage() {
       });
 
       if (res.status === 201) {
-        // ✅ Mark user as just signed up
         sessionStorage.setItem("justSignedUp", "true");
-
         setSuccess("Signup successful! Redirecting...");
         setTimeout(() => router.push("/thank-you"), 1500);
       }
-    } catch (err: any) {
-      console.error(err);
-      setError(
-        err.response?.data?.error ||
-          "An unexpected error occurred. Please try again later."
-      );
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setError(
+          error.response?.data?.error ||
+            "An unexpected error occurred. Please try again later."
+        );
+      } else {
+        setError("An unexpected error occurred. Please try again later.");
+      }
     } finally {
       setLoading(false);
     }

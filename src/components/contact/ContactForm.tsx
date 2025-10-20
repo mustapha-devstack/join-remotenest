@@ -5,12 +5,24 @@ import { Send, User, Mail, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import axios from "axios";
 
+interface FormData {
+  name: string;
+  email: string;
+  message: string;
+}
+
 export default function ContactFormSection() {
-  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    email: "",
+    message: "",
+  });
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -20,11 +32,17 @@ export default function ContactFormSection() {
     setStatus("");
 
     try {
-      const res = await axios.post("/api/contact", formData);
+      const res = await axios.post<{ message: string }>("/api/contact", formData);
       setStatus(res.data.message);
       setFormData({ name: "", email: "", message: "" });
-    } catch (err: any) {
-      setStatus(err.response?.data?.message || "Something went wrong.");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const errorMessage =
+          err.response?.data?.message || "Something went wrong.";
+        setStatus(errorMessage);
+      } else {
+        setStatus("Unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }

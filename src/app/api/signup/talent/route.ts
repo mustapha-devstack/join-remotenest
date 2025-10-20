@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get("x-forwarded-for") || "unknown";
 
-    // 🧱 Rate limit check (add this block)
+    // 🧱 Rate limit check
     try {
       await rateLimiter.consume(ip); // Consume 1 point per request
     } catch {
@@ -17,9 +17,16 @@ export async function POST(req: NextRequest) {
         { status: 429 }
       );
     }
+
     await connect();
     const body = await req.json();
-    const { fullName, email, phone, jobTitle, bio } = body;
+    const { fullName, email, phone, jobTitle, bio } = body as {
+      fullName: string;
+      email: string;
+      phone: string;
+      jobTitle: string;
+      bio?: string;
+    };
 
     // Validate required fields
     if (!fullName || !email || !phone || !jobTitle) {
@@ -73,25 +80,18 @@ export async function POST(req: NextRequest) {
       html: `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f9fafb; padding: 30px;">
           <div style="max-width: 600px; margin: auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.08);">
-            
-            <!-- Header -->
             <div style="background: linear-gradient(90deg, #00C896, #00a67d); color: white; padding: 24px; text-align: center;">
               <h1 style="margin: 0; font-size: 24px;">Welcome to Remotenest 💚</h1>
               <p style="margin: 4px 0 0; font-size: 15px;">Your global remote career journey starts here!</p>
             </div>
-
-            <!-- Body -->
             <div style="padding: 30px;">
               <h2 style="color: #111; font-size: 20px; margin-bottom: 10px;">Hi ${fullName},</h2>
               <p style="font-size: 15px; color: #444; line-height: 1.6;">
                 We're thrilled to have you onboard as a <strong>${jobTitle}</strong> in our global network of talents. 
                 You’re now part of a vibrant community that connects professionals like you with remote teams worldwide. 🌍
               </p>
-
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;" />
-
               <p style="font-size: 15px; color: #444;">Stay connected with us:</p>
-
               <div style="display: flex; gap: 12px; margin-top: 10px;">
                 <a href="https://www.facebook.com/profile.php?id=61582512719588&mibextid=ZbWKwL" target="_blank">
                   <img src="https://cdn-icons-png.flaticon.com/512/145/145802.png" width="28" alt="Facebook" />
@@ -103,7 +103,6 @@ export async function POST(req: NextRequest) {
                   <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="28" alt="Instagram" />
                 </a>
               </div>
-
               <p style="margin-top: 24px; font-size: 13px; color: #6b7280;">
                 — The Remotenest Team 💼<br/>
               </p>
@@ -128,10 +127,17 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
-    console.error("Talent signup error:", error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Talent signup error:", error.message);
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+    console.error("Unknown error during signup:", error);
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

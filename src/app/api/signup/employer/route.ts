@@ -103,7 +103,6 @@ export async function POST(req: NextRequest) {
                 </a>
                 <a href="https://www.facebook.com/profile.php?id=61582512719588&mibextid=ZbWKwL" style="margin: 0 8px;">
                   <img src="https://cdn-icons-png.flaticon.com/512/145/145802.png" width="28" alt="Facebook" />
-
                 </a>
                 <a href="https://www.instagram.com/global.remotenest?igsh=MXNxa3ZtMXBvY2NjZw==" style="margin: 0 8px;">
                   <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="28" alt="Instagram" />
@@ -134,10 +133,19 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
-    console.error("Employer signup error:", error);
+  } catch (error: unknown) {
+    // ✅ Type-safe error handling
+    if (error instanceof Error) {
+      console.error("Employer signup error:", error.message);
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+
+    console.error("Unknown error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
